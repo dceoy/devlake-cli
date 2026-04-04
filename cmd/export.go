@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/dceoy/devlake-cli/internal/export"
 	"github.com/spf13/cobra"
@@ -9,6 +10,7 @@ import (
 
 var (
 	exportOutput string
+	exportFormat string
 	exportTables []string
 )
 
@@ -33,19 +35,28 @@ var defaultTables = []string{
 
 var exportCmd = &cobra.Command{
 	Use:   "export",
-	Short: "Export DevLake domain layer tables from MySQL to SQLite",
+	Short: "Export DevLake domain layer tables",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		tables := exportTables
 		if len(tables) == 0 {
 			tables = defaultTables
 		}
-		fmt.Printf("Exporting %d tables to %s\n", len(tables), exportOutput)
-		return export.ToSQLite(dbDSN, exportOutput, tables)
+		switch strings.ToLower(exportFormat) {
+		case "sqlite":
+			fmt.Printf("Exporting %d tables to %s (SQLite)\n", len(tables), exportOutput)
+			return export.ToSQLite(dbDSN, exportOutput, tables)
+		case "iceberg":
+			fmt.Printf("Exporting %d tables to %s (Iceberg)\n", len(tables), exportOutput)
+			return export.ToIceberg(dbDSN, exportOutput, tables)
+		default:
+			return fmt.Errorf("unsupported format: %s (supported: sqlite, iceberg)", exportFormat)
+		}
 	},
 }
 
 func init() {
-	exportCmd.Flags().StringVarP(&exportOutput, "output", "o", "devlake.db", "output SQLite file path")
+	exportCmd.Flags().StringVarP(&exportOutput, "output", "o", "devlake.db", "output file path or directory")
+	exportCmd.Flags().StringVarP(&exportFormat, "format", "f", "sqlite", "output format (sqlite, iceberg)")
 	exportCmd.Flags().StringSliceVarP(&exportTables, "tables", "t", nil, "tables to export (default: domain layer tables)")
 	rootCmd.AddCommand(exportCmd)
 }

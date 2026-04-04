@@ -12,7 +12,7 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "devlake-cli",
 	Short: "CLI for Apache DevLake",
-	Long:  "A thin CLI to interact with Apache DevLake APIs and export data to SQLite.",
+	Long:  "A thin CLI to interact with Apache DevLake APIs and export data to SQLite or Apache Iceberg.",
 }
 
 func init() {
