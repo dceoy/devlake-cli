@@ -27,6 +27,12 @@ go.work.sum
 # env file
 .env
 
+# Built binary
+devlake-cli
+
+# SQLite output
+*.db
+
 # Editor/IDE
 # .idea/
 # .vscode/
